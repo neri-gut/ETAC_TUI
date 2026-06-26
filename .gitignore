@@ -1,0 +1,102 @@
+# Compiled and build artifacts
+*.class
+*.o
+*.obj
+*.out
+build/
+target/
+
+# Dependencies
+.gradle/
+.mypy_cache/
+.pytest_cache/
+__pycache__/
+node_modules/
+venv/
+.venv/
+dist/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
+.antigravity
+.agents
+#design.md
+AGENTS.md
+GEMINI.md
+HELP.md
+
+# Environment
+.env
+.env.local
+*.env.*
+#src/main/resources/application.properties
