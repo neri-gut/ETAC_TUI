@@ -1,10 +1,6 @@
 package com.etacind.tui.command.igsf.t001;
 
 import com.etacind.tui.dto.igsf.c001.UsersTableRecord;
-import com.etacind.tui.dto.igsf.c001.ProductsTableRecord;
-import com.etacind.tui.dto.igsf.c001.StatusTableRecord;
-import com.etacind.tui.dto.igsf.c001.ActionsTableRecord;
-import com.etacind.tui.dto.igsf.c001.HistoryTableRecord;
 import com.etacind.tui.dto.igsf.c001.response.SupabaseApiResponse;
 import com.etacind.tui.service.igsf.r002.IGSFR002;
 import org.springframework.stereotype.Component;
@@ -26,23 +22,19 @@ public class IGSFT001 {
         return igsfR002.executeGetUsers();
     }
 
-    public SupabaseApiResponse<ProductsTableRecord> createProduct(ProductsTableRecord request) {
-        return igsfR002.executeCreateProduct(request);
+    public SupabaseApiResponse<UsersTableRecord> deleteUserById(String userId) {
+        return igsfR002.executeDeleteUserById(userId);
     }
 
-    public SupabaseApiResponse<ProductsTableRecord> getProducts() {
-        return igsfR002.executeGetProducts();
+    public SupabaseApiResponse<UsersTableRecord> deleteUserByIdentifier(String userIdentifier) {
+        return igsfR002.executeDeleteUserByIdentifier(userIdentifier);
     }
 
-    public SupabaseApiResponse<StatusTableRecord> getStatuses() {
-        return igsfR002.executeGetStatuses();
+    public SupabaseApiResponse<UsersTableRecord> updateUser(String userId, UsersTableRecord request) {
+        return igsfR002.executeUpdateUser(userId, request);
     }
 
-    public SupabaseApiResponse<ActionsTableRecord> getActions() {
-        return igsfR002.executeGetActions();
-    }
-
-    public SupabaseApiResponse<HistoryTableRecord> getHistory() {
-        return igsfR002.executeGetHistory();
+    public SupabaseApiResponse<UsersTableRecord> getUserById(String userId) {
+        return igsfR002.executeGetUserById(userId);
     }
 }

@@ -69,6 +69,8 @@ public class IGSFU001Impl implements IGSFU001 {
 
         mainPanel.addComponent(new Button("Listar Usuarios", () -> showUsersList(gui)));
         mainPanel.addComponent(new Button("Crear Usuario", () -> showCreateUserDialog(gui)));
+        mainPanel.addComponent(new Button("Actualizar Usuario", () -> showUpdateUserDialog(gui)));
+        mainPanel.addComponent(new Button("Eliminar Usuario", () -> showDeleteUserDialog(gui)));
         mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
         mainPanel.addComponent(new Button("Salir", window::close));
 
@@ -180,5 +182,247 @@ public class IGSFU001Impl implements IGSFU001 {
         mainPanel.addComponent(buttonPanel);
         dialogWindow.setComponent(mainPanel);
         gui.addWindow(dialogWindow);
+    }
+
+    private void showDeleteUserDialog(WindowBasedTextGUI gui) {
+        BasicWindow submenuWindow = new BasicWindow("Eliminar Usuario - Opciones");
+        submenuWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        mainPanel.addComponent(new Label("Seleccione el metodo de eliminacion:"));
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        mainPanel.addComponent(new Button("Eliminar por ID (userid)", () -> {
+            submenuWindow.close();
+            showDeleteByIdForm(gui);
+        }));
+
+        mainPanel.addComponent(new Button("Eliminar por Identificador (useridentifier)", () -> {
+            submenuWindow.close();
+            showDeleteByIdentifierForm(gui);
+        }));
+
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+        mainPanel.addComponent(new Button("Volver al Menu", submenuWindow::close));
+
+        submenuWindow.setComponent(mainPanel);
+        gui.addWindow(submenuWindow);
+    }
+
+    private void showDeleteByIdForm(WindowBasedTextGUI gui) {
+        BasicWindow dialogWindow = new BasicWindow("Eliminar por ID");
+        dialogWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel formPanel = new Panel(new GridLayout(2));
+
+        formPanel.addComponent(new Label("ID de Usuario (userid):"));
+        TextBox txtUserId = new TextBox();
+        formPanel.addComponent(txtUserId);
+
+        mainPanel.addComponent(formPanel);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        
+        Button btnDelete = new Button("Eliminar", () -> {
+            String userId = txtUserId.getText().trim();
+            if (userId.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "El ID de usuario es obligatorio");
+                return;
+            }
+
+            SupabaseApiResponse<UsersTableRecord> response = igsfT001.deleteUserById(userId);
+            handleDeleteResponse(gui, dialogWindow, response, "No se pudo encontrar o eliminar el usuario con ese ID");
+        });
+        
+        buttonPanel.addComponent(btnDelete);
+        buttonPanel.addComponent(new Button("Cancelar", dialogWindow::close));
+
+        mainPanel.addComponent(buttonPanel);
+        dialogWindow.setComponent(mainPanel);
+        gui.addWindow(dialogWindow);
+    }
+
+    private void showDeleteByIdentifierForm(WindowBasedTextGUI gui) {
+        BasicWindow dialogWindow = new BasicWindow("Eliminar por Identificador");
+        dialogWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel formPanel = new Panel(new GridLayout(2));
+
+        formPanel.addComponent(new Label("Identificador (useridentifier):"));
+        TextBox txtIdentifier = new TextBox();
+        formPanel.addComponent(txtIdentifier);
+
+        mainPanel.addComponent(formPanel);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        
+        Button btnDelete = new Button("Eliminar", () -> {
+            String identifier = txtIdentifier.getText().trim();
+            if (identifier.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "El identificador es obligatorio");
+                return;
+            }
+
+            SupabaseApiResponse<UsersTableRecord> response = igsfT001.deleteUserByIdentifier(identifier);
+            handleDeleteResponse(gui, dialogWindow, response, "No se pudo encontrar o eliminar el usuario con ese identificador");
+        });
+        
+        buttonPanel.addComponent(btnDelete);
+        buttonPanel.addComponent(new Button("Cancelar", dialogWindow::close));
+
+        mainPanel.addComponent(buttonPanel);
+        dialogWindow.setComponent(mainPanel);
+        gui.addWindow(dialogWindow);
+    }
+
+    private void handleDeleteResponse(WindowBasedTextGUI gui, BasicWindow parentWindow, SupabaseApiResponse<UsersTableRecord> response, String errorMessage) {
+        if (response != null && response.data() != null && !response.data().isEmpty()) {
+            UsersTableRecord deleted = response.data().get(0);
+            
+            BasicWindow successWindow = new BasicWindow("Eliminacion Exitosa");
+            successWindow.setHints(List.of(Window.Hint.CENTERED));
+            
+            Panel successPanel = new Panel(new GridLayout(1));
+            successPanel.addComponent(new Label("Usuario eliminado de la base de datos:"));
+            successPanel.addComponent(new Separator(Direction.HORIZONTAL));
+            
+            Table<String> successTable = new Table<>("ID", "Identificador", "Nombre", "ID Estado", "Fecha Creacion");
+            successTable.getTableModel().addRow(
+                    deleted.userId() != null ? deleted.userId() : "",
+                    deleted.userIdentifier() != null ? deleted.userIdentifier() : "",
+                    deleted.userName() != null ? deleted.userName() : "",
+                    deleted.statusId() != null ? deleted.statusId() : "",
+                    deleted.createdAt() != null ? deleted.createdAt() : ""
+            );
+            successPanel.addComponent(successTable);
+            successPanel.addComponent(new Separator(Direction.HORIZONTAL));
+            successPanel.addComponent(new Button("Aceptar", successWindow::close));
+            
+            successWindow.setComponent(successPanel);
+            parentWindow.close();
+            gui.addWindow(successWindow);
+        } else {
+            MessageDialog.showMessageDialog(gui, "Error", errorMessage);
+        }
+    }
+
+    private void showUpdateUserDialog(WindowBasedTextGUI gui) {
+        BasicWindow dialogWindow = new BasicWindow("Actualizar Usuario");
+        dialogWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel formPanel = new Panel(new GridLayout(2));
+
+        formPanel.addComponent(new Label("ID de Usuario a modificar (userid):"));
+        TextBox txtUserId = new TextBox();
+        formPanel.addComponent(txtUserId);
+
+        mainPanel.addComponent(formPanel);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        
+        Button btnSearch = new Button("Buscar", () -> {
+            String userId = txtUserId.getText().trim();
+            if (userId.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "El ID de usuario es obligatorio");
+                return;
+            }
+
+            SupabaseApiResponse<UsersTableRecord> response = igsfT001.getUserById(userId);
+            if (response != null && response.data() != null && !response.data().isEmpty()) {
+                UsersTableRecord current = response.data().get(0);
+                dialogWindow.close();
+                showEditUserForm(gui, userId, current);
+            } else {
+                MessageDialog.showMessageDialog(gui, "Error", "No se pudo encontrar un usuario con ese ID");
+            }
+        });
+
+        buttonPanel.addComponent(btnSearch);
+        buttonPanel.addComponent(new Button("Cancelar", dialogWindow::close));
+
+        mainPanel.addComponent(buttonPanel);
+        dialogWindow.setComponent(mainPanel);
+        gui.addWindow(dialogWindow);
+    }
+
+    private void showEditUserForm(WindowBasedTextGUI gui, String userId, UsersTableRecord current) {
+        BasicWindow editWindow = new BasicWindow("Modificar Registro");
+        editWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel formPanel = new Panel(new GridLayout(2));
+
+        formPanel.addComponent(new Label("Identificador:"));
+        TextBox txtIdentifier = new TextBox(current.userIdentifier() != null ? current.userIdentifier() : "");
+        formPanel.addComponent(txtIdentifier);
+
+        formPanel.addComponent(new Label("Nombre Completo:"));
+        TextBox txtName = new TextBox(current.userName() != null ? current.userName() : "");
+        formPanel.addComponent(txtName);
+
+        formPanel.addComponent(new Label("ID Estado:"));
+        TextBox txtStatusId = new TextBox(current.statusId() != null ? current.statusId() : "1");
+        formPanel.addComponent(txtStatusId);
+
+        mainPanel.addComponent(formPanel);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        
+        Button btnSave = new Button("Guardar", () -> {
+            String identifier = txtIdentifier.getText().trim();
+            String name = txtName.getText().trim();
+            String statusId = txtStatusId.getText().trim();
+
+            if (identifier.isEmpty() || name.isEmpty() || statusId.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "Todos los campos son obligatorios");
+                return;
+            }
+
+            // Excluimos userId y createdAt enviandolos como null para que Jackson no los serialice en el PATCH
+            UsersTableRecord updated = new UsersTableRecord(null, identifier, name, statusId, null);
+            SupabaseApiResponse<UsersTableRecord> response = igsfT001.updateUser(userId, updated);
+            if (response != null && response.data() != null && !response.data().isEmpty()) {
+                UsersTableRecord result = response.data().get(0);
+                
+                BasicWindow successWindow = new BasicWindow("Actualizacion Exitosa");
+                successWindow.setHints(List.of(Window.Hint.CENTERED));
+                
+                Panel successPanel = new Panel(new GridLayout(1));
+                successPanel.addComponent(new Label("Usuario actualizado exitosamente:"));
+                successPanel.addComponent(new Separator(Direction.HORIZONTAL));
+                
+                Table<String> successTable = new Table<>("ID", "Identificador", "Nombre", "ID Estado", "Fecha Creacion");
+                successTable.getTableModel().addRow(
+                        result.userId() != null ? result.userId() : "",
+                        result.userIdentifier() != null ? result.userIdentifier() : "",
+                        result.userName() != null ? result.userName() : "",
+                        result.statusId() != null ? result.statusId() : "",
+                        result.createdAt() != null ? result.createdAt() : ""
+                );
+                successPanel.addComponent(successTable);
+                successPanel.addComponent(new Separator(Direction.HORIZONTAL));
+                successPanel.addComponent(new Button("Aceptar", successWindow::close));
+                
+                successWindow.setComponent(successPanel);
+                editWindow.close();
+                gui.addWindow(successWindow);
+            } else {
+                MessageDialog.showMessageDialog(gui, "Error", "No se pudo actualizar el usuario en Supabase");
+            }
+        });
+
+        buttonPanel.addComponent(btnSave);
+        buttonPanel.addComponent(new Button("Cancelar", editWindow::close));
+
+        mainPanel.addComponent(buttonPanel);
+        editWindow.setComponent(mainPanel);
+        gui.addWindow(editWindow);
     }
 }
