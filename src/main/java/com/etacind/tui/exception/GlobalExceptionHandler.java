@@ -41,9 +41,9 @@ public class GlobalExceptionHandler implements CommandExceptionResolver {
     private CommandHandlingResult handleSupabaseError(SupabaseApiException ex) {
         String message = String.format("""
             
-            ⚠️  [Error de Infraestructura] -> Fallo en el servidor de Supabase
-            🛑 Código HTTP: %d
-            📝 Detalle: %s
+            [Error de Infraestructura] -> Fallo en el servidor de Supabase
+            Codigo HTTP: %d
+            Detalle: %s
             """, ex.getStatusCode(), ex.getMessage());
         return CommandHandlingResult.of(message, ERROR_EXIT_CODE);
     }
@@ -51,9 +51,9 @@ public class GlobalExceptionHandler implements CommandExceptionResolver {
     private CommandHandlingResult handleRestClientError(RestClientResponseException ex) {
         String message = String.format("""
             
-            ⚡ [Error de Comunicación] -> La API externa devolvió una estructura no esperada.
-            🛑 Estado: %s
-            🔍 Respuesta Cruda: %s
+            [Error de Comunicacion] -> La API externa devolvio una estructura no esperada.
+            Estado: %s
+            Respuesta Cruda: %s
             """, ex.getStatusText(), ex.getResponseBodyAsString());
         return CommandHandlingResult.of(message, ERROR_EXIT_CODE);
     }
@@ -61,8 +61,8 @@ public class GlobalExceptionHandler implements CommandExceptionResolver {
     private CommandHandlingResult handleValidationError(BusinessValidationException ex) {
         String message = String.format("""
             
-            🛑 [Datos Inválidos] -> La petición no cumple con las reglas de negocio.
-            📝 Validación: %s
+            [Datos Invalidos] -> La peticion no cumple con las reglas de negocio.
+            Validacion: %s
             """, ex.getMessage());
         return CommandHandlingResult.of(message, ERROR_EXIT_CODE);
     }
@@ -70,9 +70,9 @@ public class GlobalExceptionHandler implements CommandExceptionResolver {
     private CommandHandlingResult handleNetworkError(ResourceAccessException ex) {
         String message = String.format("""
             
-            🌐 [Error de Red] -> No se pudo establecer conexión con el servidor.
-            🔌 Verifique que su dispositivo cuente con acceso a internet.
-            🔍 Detalle: %s
+            [Error de Red] -> No se pudo establecer conexion con el servidor.
+            Verifique que su dispositivo cuente con acceso a internet.
+            Detalle: %s
             """, ex.getMessage());
         return CommandHandlingResult.of(message, ERROR_EXIT_CODE);
     }
@@ -80,10 +80,10 @@ public class GlobalExceptionHandler implements CommandExceptionResolver {
     private CommandHandlingResult handleUnexpectedError(Throwable ex) {
         String message = String.format("""
             
-            ❌ [Fallo Inesperado] -> Ha ocurrido un error no controlado en el sistema.
-            🔍 Excepción: %s
-            ⚠️  Mensaje Técnico: %s
-            💡 Sugerencia: Intente ejecutar el comando mediante el asistente guiado.
+            [Fallo Inesperado] -> Ha ocurrido un error no controlado en el sistema.
+            Excepcion: %s
+            Mensaje Tecnico: %s
+            Sugerencia: Intente ejecutar el comando mediante el asistente guiado.
             """, ex.getClass().getSimpleName(), ex.getMessage());
         return CommandHandlingResult.of(message, ERROR_EXIT_CODE);
     }
