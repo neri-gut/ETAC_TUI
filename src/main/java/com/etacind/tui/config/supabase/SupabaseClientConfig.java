@@ -20,11 +20,16 @@ public class SupabaseClientConfig {
 
     @Bean
     public RestClient supabaseRestClient() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory requestFactory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(5000);
+
         return RestClient.builder()
+                .requestFactory(requestFactory)
                 .baseUrl(url + ConstantSupabase.REST_V1.getValue())
                 .defaultHeader(ConstantSupabase.API_KEY.getValue(), apiKey)
-                .defaultHeader(ConstantSupabase.CONTENT_TYPE.getValue(), String.valueOf(ConstantSupabase.APLICATION_JSON))
-                .defaultHeader(ConstantSupabase.PREFER.getValue(), String.valueOf(ConstantSupabase.RETURN_REPRESENTATION))
+                .defaultHeader(ConstantSupabase.CONTENT_TYPE.getValue(), ConstantSupabase.APLICATION_JSON.getValue())
+                .defaultHeader(ConstantSupabase.PREFER.getValue(), ConstantSupabase.RETURN_REPRESENTATION.getValue())
                 .build();
     }
 }

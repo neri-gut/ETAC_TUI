@@ -38,7 +38,7 @@ public class IGSFR001Impl implements IGSFR001 {
 
         LOGGER.info("Response Body: {}", (Object) responseBody);
         LOGGER.info("Termina executeInsert");
-        return new SupabaseApiResponse<>(responseBody != null ? List.of(responseBody) : List.of());
+        return new SupabaseApiResponse<>(responseBody != null ? java.util.Arrays.asList(responseBody) : List.of());
     }
 
     @Override
@@ -58,6 +58,6 @@ public class IGSFR001Impl implements IGSFR001 {
 
         LOGGER.info("Response Body: {}", (Object) responseBody);
         LOGGER.info("Termina executeSelect");
-        return new SupabaseApiResponse<>(responseBody != null ? List.of(responseBody) : List.of());
+        return new SupabaseApiResponse<>(responseBody != null ? java.util.Arrays.asList(responseBody) : List.of());
     }
 }
