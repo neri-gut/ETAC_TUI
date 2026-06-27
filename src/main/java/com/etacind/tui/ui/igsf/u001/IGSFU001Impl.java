@@ -28,6 +28,7 @@ public class IGSFU001Impl implements IGSFU001 {
     private final IGSFT003 igsfT003;
 
     private boolean hasWritePermission = false;
+    private String currentOperatorUserId = null;
 
     public IGSFU001Impl(IGSFT001 igsfT001, IGSFT002 igsfT002, IGSFT003 igsfT003) {
         this.igsfT001 = igsfT001;
@@ -90,6 +91,7 @@ public class IGSFU001Impl implements IGSFU001 {
             SupabaseApiResponse<UsersTableRecord> response = igsfT001.getUserById(userId);
             if (response != null && response.data() != null && !response.data().isEmpty()) {
                 UsersTableRecord operator = response.data().get(0);
+                currentOperatorUserId = operator.userId();
                 if ("1".equals(operator.statusId())) {
                     hasWritePermission = true;
                     MessageDialog.showMessageDialog(gui, "Acceso Permitido", "Bienvenido " + operator.userName() + ".\nPermisos de escritura activados (statusId = 1).");
@@ -163,12 +165,16 @@ public class IGSFU001Impl implements IGSFU001 {
     }
 
     private void showUsersList(WindowBasedTextGUI gui) {
+        SupabaseApiResponse<UsersTableRecord> response = igsfT001.getUsers();
+        if (response != null && response.data() != null && !response.data().isEmpty()) {
+            igsfT003.insertHistory(currentOperatorUserId, "4", null); // Audit READ
+        }
+
         BasicWindow listWindow = new BasicWindow("Usuarios Registrados");
         listWindow.setHints(List.of(Window.Hint.CENTERED));
 
         Panel mainPanel = new Panel(new GridLayout(1));
 
-        SupabaseApiResponse<UsersTableRecord> response = igsfT001.getUsers();
         if (response == null || response.data() == null || response.data().isEmpty()) {
             mainPanel.addComponent(new Label("No se encontraron registros de usuarios."));
         } else {
@@ -235,7 +241,8 @@ public class IGSFU001Impl implements IGSFU001 {
             SupabaseApiResponse<UsersTableRecord> response = igsfT001.createUser(record);
             if (response != null && response.data() != null && !response.data().isEmpty()) {
                 UsersTableRecord created = response.data().get(0);
-                
+                igsfT003.insertHistory(currentOperatorUserId, "1", null); // Audit CREATE User
+
                 BasicWindow successWindow = new BasicWindow("Confirmacion");
                 successWindow.setHints(List.of(Window.Hint.CENTERED));
                 
@@ -302,6 +309,7 @@ public class IGSFU001Impl implements IGSFU001 {
             SupabaseApiResponse<UsersTableRecord> response = igsfT001.getUserById(userId);
             if (response != null && response.data() != null && !response.data().isEmpty()) {
                 UsersTableRecord current = response.data().get(0);
+                igsfT003.insertHistory(currentOperatorUserId, "4", null); // Audit READ user details
                 dialogWindow.close();
                 showEditUserForm(gui, userId, current);
             } else {
@@ -355,7 +363,8 @@ public class IGSFU001Impl implements IGSFU001 {
             SupabaseApiResponse<UsersTableRecord> response = igsfT001.updateUser(userId, updated);
             if (response != null && response.data() != null && !response.data().isEmpty()) {
                 UsersTableRecord result = response.data().get(0);
-                
+                igsfT003.insertHistory(currentOperatorUserId, "3", null); // Audit UPDATE user
+
                 BasicWindow successWindow = new BasicWindow("Actualizacion Exitosa");
                 successWindow.setHints(List.of(Window.Hint.CENTERED));
                 
@@ -494,7 +503,8 @@ public class IGSFU001Impl implements IGSFU001 {
     private void handleDeleteResponse(WindowBasedTextGUI gui, BasicWindow parentWindow, SupabaseApiResponse<UsersTableRecord> response, String errorMessage) {
         if (response != null && response.data() != null && !response.data().isEmpty()) {
             UsersTableRecord deleted = response.data().get(0);
-            
+            igsfT003.insertHistory(currentOperatorUserId, "2", null); // Audit DELETE User
+
             BasicWindow successWindow = new BasicWindow("Eliminacion Exitosa");
             successWindow.setHints(List.of(Window.Hint.CENTERED));
             
@@ -547,12 +557,16 @@ public class IGSFU001Impl implements IGSFU001 {
     }
 
     private void showProductsList(WindowBasedTextGUI gui) {
+        SupabaseApiResponse<ProductsTableRecord> response = igsfT002.getProducts();
+        if (response != null && response.data() != null && !response.data().isEmpty()) {
+            igsfT003.insertHistory(currentOperatorUserId, "4", null); // Audit READ
+        }
+
         BasicWindow listWindow = new BasicWindow("Productos Registrados");
         listWindow.setHints(List.of(Window.Hint.CENTERED));
 
         Panel mainPanel = new Panel(new GridLayout(1));
 
-        SupabaseApiResponse<ProductsTableRecord> response = igsfT002.getProducts();
         if (response == null || response.data() == null || response.data().isEmpty()) {
             mainPanel.addComponent(new Label("No se encontraron registros de productos."));
         } else {
@@ -625,7 +639,8 @@ public class IGSFU001Impl implements IGSFU001 {
             SupabaseApiResponse<ProductsTableRecord> response = igsfT002.createProduct(record);
             if (response != null && response.data() != null && !response.data().isEmpty()) {
                 ProductsTableRecord created = response.data().get(0);
-                
+                igsfT003.insertHistory(currentOperatorUserId, "1", created.productId()); // Audit CREATE Product
+
                 BasicWindow successWindow = new BasicWindow("Confirmacion");
                 successWindow.setHints(List.of(Window.Hint.CENTERED));
                 
@@ -693,6 +708,7 @@ public class IGSFU001Impl implements IGSFU001 {
             SupabaseApiResponse<ProductsTableRecord> response = igsfT002.getProductById(productId);
             if (response != null && response.data() != null && !response.data().isEmpty()) {
                 ProductsTableRecord current = response.data().get(0);
+                igsfT003.insertHistory(currentOperatorUserId, "4", current.productId()); // Audit READ Product
                 dialogWindow.close();
                 showEditProductForm(gui, productId, current);
             } else {
@@ -751,7 +767,8 @@ public class IGSFU001Impl implements IGSFU001 {
             SupabaseApiResponse<ProductsTableRecord> response = igsfT002.updateProduct(updated);
             if (response != null && response.data() != null && !response.data().isEmpty()) {
                 ProductsTableRecord result = response.data().get(0);
-                
+                igsfT003.insertHistory(currentOperatorUserId, "3", result.productId()); // Audit UPDATE Product
+
                 BasicWindow successWindow = new BasicWindow("Actualizacion Exitosa");
                 successWindow.setHints(List.of(Window.Hint.CENTERED));
                 
@@ -831,7 +848,8 @@ public class IGSFU001Impl implements IGSFU001 {
     private void handleProductDeleteResponse(WindowBasedTextGUI gui, BasicWindow parentWindow, SupabaseApiResponse<ProductsTableRecord> response, String errorMessage) {
         if (response != null && response.data() != null && !response.data().isEmpty()) {
             ProductsTableRecord deleted = response.data().get(0);
-            
+            igsfT003.insertHistory(currentOperatorUserId, "2", deleted.productId()); // Audit DELETE Product
+
             BasicWindow successWindow = new BasicWindow("Eliminacion Exitosa");
             successWindow.setHints(List.of(Window.Hint.CENTERED));
             
@@ -909,6 +927,9 @@ public class IGSFU001Impl implements IGSFU001 {
             }
 
             SupabaseApiResponse<ProductsTableRecord> response = igsfT002.getProductById(productId);
+            if (response != null && response.data() != null && !response.data().isEmpty()) {
+                igsfT003.insertHistory(currentOperatorUserId, "4", response.data().get(0).productId()); // Audit READ Product
+            }
             displayProductSearchResults(gui, dialogWindow, response, "No se encontro ningun producto con ese ID");
         });
         
@@ -944,6 +965,9 @@ public class IGSFU001Impl implements IGSFU001 {
             }
 
             SupabaseApiResponse<ProductsTableRecord> response = igsfT002.getProductByName(productName);
+            if (response != null && response.data() != null && !response.data().isEmpty()) {
+                igsfT003.insertHistory(currentOperatorUserId, "4", response.data().get(0).productId()); // Audit READ Product
+            }
             displayProductSearchResults(gui, dialogWindow, response, "No se encontraron productos con ese nombre");
         });
         

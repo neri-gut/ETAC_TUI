@@ -37,4 +37,9 @@ public class IGSFT003 {
         HistoryTableRecord request = new HistoryTableRecord(null, null, null, null, executionDate);
         return igsfR004.executeSearchHistoryByDate(request);
     }
+
+    public void insertHistory(String userId, String actionId, String productId) {
+        HistoryTableRecord record = new HistoryTableRecord(null, userId, actionId, productId, null);
+        igsfR004.executeInsertHistory(record);
+    }
 }
