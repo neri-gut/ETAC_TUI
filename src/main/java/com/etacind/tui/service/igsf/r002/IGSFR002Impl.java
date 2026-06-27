@@ -23,30 +23,65 @@ public class IGSFR002Impl implements IGSFR002 {
 
     @Override
     public SupabaseApiResponse<UsersTableRecord> execureCreateUser(UsersTableRecord request) {
-
-        SupabaseApiResponse<UsersTableRecord> response = null;
         LOGGER.info("Inicia executeCreateUser");
         LOGGER.info("request: {}", request);
-
-        if (request != null
-            && !request.userIdentifier().isEmpty()
-            && !request.userName().isEmpty()
-            && !request.statusId().isEmpty()){
-            LOGGER.info("Paso If");
-                SupabaseApiRequest<UsersTableRecord> supabaseRequest = new SupabaseApiRequest<>(UsersConstants.USERS_TABLE.value(), request, null);
-                response = igsfR001.executeInsert(supabaseRequest, UsersTableRecord[].class);
-                LOGGER.info("response data: {}", response.data());
-        }
-
+        SupabaseApiRequest<UsersTableRecord> supabaseRequest = new SupabaseApiRequest<>(UsersConstants.USERS_TABLE.value(), request, null);
+        SupabaseApiResponse<UsersTableRecord> response = igsfR001.executeInsert(supabaseRequest, UsersTableRecord[].class);
+        LOGGER.info("Termina executeCreateUser");
         return response;
     }
 
     @Override
-    public SupabaseApiResponse<UsersTableRecord> executeSelectUserById(UsersTableRecord request){
-        SupabaseApiResponse<UsersTableRecord> response = null;
-
-
-
+    public SupabaseApiResponse<UsersTableRecord> executeGetUsers() {
+        LOGGER.info("Inicia executeGetUsers");
+        SupabaseApiRequest<Void> supabaseRequest = new SupabaseApiRequest<>(UsersConstants.USERS_TABLE.value(), null, null);
+        SupabaseApiResponse<UsersTableRecord> response = igsfR001.executeSelect(supabaseRequest, UsersTableRecord[].class);
+        LOGGER.info("Termina executeGetUsers");
+        return response;
     }
 
+    @Override
+    public SupabaseApiResponse<UsersTableRecord> executeDeleteUserById(String userId) {
+        LOGGER.info("Inicia executeDeleteUserById");
+        LOGGER.info("userId to delete: {}", userId);
+        java.util.Map<String, String> queryParams = java.util.Map.of("userId", "eq." + userId);
+        SupabaseApiRequest<Void> supabaseRequest = new SupabaseApiRequest<>(UsersConstants.USERS_TABLE.value(), null, queryParams);
+        SupabaseApiResponse<UsersTableRecord> response = igsfR001.executeDelete(supabaseRequest, UsersTableRecord[].class);
+        LOGGER.info("Termina executeDeleteUserById");
+        return response;
+    }
+
+    @Override
+    public SupabaseApiResponse<UsersTableRecord> executeDeleteUserByIdentifier(String userIdentifier) {
+        LOGGER.info("Inicia executeDeleteUserByIdentifier");
+        LOGGER.info("userIdentifier to delete: {}", userIdentifier);
+        java.util.Map<String, String> queryParams = java.util.Map.of("userIdentifier", "eq." + userIdentifier);
+        SupabaseApiRequest<Void> supabaseRequest = new SupabaseApiRequest<>(UsersConstants.USERS_TABLE.value(), null, queryParams);
+        SupabaseApiResponse<UsersTableRecord> response = igsfR001.executeDelete(supabaseRequest, UsersTableRecord[].class);
+        LOGGER.info("Termina executeDeleteUserByIdentifier");
+        return response;
+    }
+
+    @Override
+    public SupabaseApiResponse<UsersTableRecord> executeUpdateUser(String userId, UsersTableRecord request) {
+        LOGGER.info("Inicia executeUpdateUser");
+        LOGGER.info("userId to update: {}", userId);
+        java.util.Map<String, String> queryParams = java.util.Map.of("userId", "eq." + userId);
+        SupabaseApiRequest<UsersTableRecord> supabaseRequest = new SupabaseApiRequest<>(UsersConstants.USERS_TABLE.value(), request, queryParams);
+        SupabaseApiResponse<UsersTableRecord> response = igsfR001.executeUpdate(supabaseRequest, UsersTableRecord[].class);
+        LOGGER.info("Termina executeUpdateUser");
+        return response;
+    }
+
+    @Override
+    public SupabaseApiResponse<UsersTableRecord> executeGetUserById(String userId) {
+        LOGGER.info("Inicia executeGetUserById");
+        LOGGER.info("userId to get: {}", userId);
+        java.util.Map<String, String> queryParams = java.util.Map.of("userId", "eq." + userId);
+        SupabaseApiRequest<Void> supabaseRequest = new SupabaseApiRequest<>(UsersConstants.USERS_TABLE.value(), null, queryParams);
+        SupabaseApiResponse<UsersTableRecord> response = igsfR001.executeSelect(supabaseRequest, UsersTableRecord[].class);
+        LOGGER.info("Termina executeGetUserById");
+        return response;
+    }
 }
+

@@ -8,4 +8,8 @@ public interface IGSFR001 {
     <T, R> SupabaseApiResponse<R> executeInsert(SupabaseApiRequest<T> request, Class<R[]> responseType);
     
     <R> SupabaseApiResponse<R> executeSelect(SupabaseApiRequest<Void> request, Class<R[]> responseType);
+
+    <R> SupabaseApiResponse<R> executeDelete(SupabaseApiRequest<Void> request, Class<R[]> responseType);
+
+    <T, R> SupabaseApiResponse<R> executeUpdate(SupabaseApiRequest<T> request, Class<R[]> responseType);
 }

@@ -1,7 +1,9 @@
 package com.etacind.tui.dto.igsf.c001;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(value = JsonInclude.Include.NON_NULL, content = JsonInclude.Include.NON_NULL)
 public record UsersTableRecord(
     String userId,
     String userIdentifier,

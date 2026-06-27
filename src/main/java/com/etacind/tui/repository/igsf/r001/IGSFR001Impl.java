@@ -38,7 +38,7 @@ public class IGSFR001Impl implements IGSFR001 {
 
         LOGGER.info("Response Body: {}", (Object) responseBody);
         LOGGER.info("Termina executeInsert");
-        return new SupabaseApiResponse<>(responseBody != null ? List.of(responseBody) : List.of());
+        return new SupabaseApiResponse<>(responseBody != null ? java.util.Arrays.asList(responseBody) : List.of());
     }
 
     @Override
@@ -58,6 +58,47 @@ public class IGSFR001Impl implements IGSFR001 {
 
         LOGGER.info("Response Body: {}", (Object) responseBody);
         LOGGER.info("Termina executeSelect");
-        return new SupabaseApiResponse<>(responseBody != null ? List.of(responseBody) : List.of());
+        return new SupabaseApiResponse<>(responseBody != null ? java.util.Arrays.asList(responseBody) : List.of());
+    }
+
+    @Override
+    public <R> SupabaseApiResponse<R> executeDelete(SupabaseApiRequest<Void> request, Class<R[]> responseType) {
+        LOGGER.info("Inicia executeDelete");
+        LOGGER.info("request: {}", request);
+        R[] responseBody = supabaseRestClient.delete()
+                .uri(uriBuilder -> {
+                    uriBuilder.path("/" + request.tableName());
+                    if (request.queryParams() != null) {
+                        request.queryParams().forEach(uriBuilder::queryParam);
+                    }
+                    return uriBuilder.build();
+                })
+                .retrieve()
+                .body(responseType);
+
+        LOGGER.info("Response Body: {}", (Object) responseBody);
+        LOGGER.info("Termina executeDelete");
+        return new SupabaseApiResponse<>(responseBody != null ? java.util.Arrays.asList(responseBody) : List.of());
+    }
+
+    @Override
+    public <T, R> SupabaseApiResponse<R> executeUpdate(SupabaseApiRequest<T> request, Class<R[]> responseType) {
+        LOGGER.info("Inicia executeUpdate");
+        LOGGER.info("request: {}", request);
+        R[] responseBody = supabaseRestClient.patch()
+                .uri(uriBuilder -> {
+                    uriBuilder.path("/" + request.tableName());
+                    if (request.queryParams() != null) {
+                        request.queryParams().forEach(uriBuilder::queryParam);
+                    }
+                    return uriBuilder.build();
+                })
+                .body(request.body())
+                .retrieve()
+                .body(responseType);
+
+        LOGGER.info("Response Body: {}", (Object) responseBody);
+        LOGGER.info("Termina executeUpdate");
+        return new SupabaseApiResponse<>(responseBody != null ? java.util.Arrays.asList(responseBody) : List.of());
     }
 }
