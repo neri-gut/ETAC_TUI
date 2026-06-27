@@ -5,6 +5,13 @@
 *.out
 build/
 target/
+*.jar
+*.war
+*.ear
+*.jnilib
+*.so
+*.dll
+*.dylib
 
 # Dependencies
 .gradle/

@@ -7,6 +7,4 @@ public interface IGSFR002 {
 
     SupabaseApiResponse<UsersTableRecord> execureCreateUser(UsersTableRecord request);
 
-    SupabaseApiResponse<UsersTableRecord> executeSelectUserById(UsersTableRecord request);
-
 }

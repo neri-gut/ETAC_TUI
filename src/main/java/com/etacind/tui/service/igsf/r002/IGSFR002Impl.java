@@ -41,12 +41,4 @@ public class IGSFR002Impl implements IGSFR002 {
         return response;
     }
 
-    @Override
-    public SupabaseApiResponse<UsersTableRecord> executeSelectUserById(UsersTableRecord request){
-        SupabaseApiResponse<UsersTableRecord> response = null;
-
-
-
-    }
-
 }
