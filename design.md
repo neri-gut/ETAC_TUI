@@ -132,39 +132,7 @@ La CLI responderá a dos modos de ejecución dentro del mismo comando. El **Modo
 
 ### Ejemplo de Estructura de Control en Comandos:
 
-```java
-@ShellMethod(key = "product create", value = "Registrar un nuevo producto")
-public String createProduct(
-        @ShellOption(defaultValue = ShellOption.NULL, arity = 1) String name,
-        @ShellOption(defaultValue = "-1.0", arity = 1) double price) {
-
-    // Evaluación de Modo de Ejecución
-    if (name != null && price >= 0) {
-        // Ejecución No Interactiva Directa
-        Product newProduct = new Product(null, name, price, null);
-        productService.save(newProduct);
-        return "📦 Producto creado directamente.";
-    }
-
-    // Ejecución Interactiva mediante ComponentFlow (TUI)
-    ComponentFlow flow = componentFlowBuilder.clone().reset()
-            .withStringInput("productName")
-                .name("📝 Nombre del Producto: ")
-                .and()
-            .withStringInput("productPrice")
-                .name("💵 Precio ($): ")
-                .and()
-            .build();
-
-    ComponentFlow.ComponentFlowResult result = flow.run();
-    String inputName = result.getContext().get("productName");
-    double inputPrice = Double.parseDouble(result.getContext().get("productPrice"));
-
-    productService.save(new Product(null, inputName, inputPrice, null));
-    return "✨ Producto creado exitosamente a través del asistente.";
-}
-
-```
+A definir formato de menú interactivo.
 
 ---
 
@@ -295,7 +263,6 @@ public class SupabaseClientConfig {
         return RestClient.builder()
                 .baseUrl(url + "/rest/v1")
                 .defaultHeader("apikey", apiKey)
-                .defaultHeader("Authorization", "Bearer " + apiKey)
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("Prefer", "return=representation")
                 .build();
@@ -358,6 +325,12 @@ com.supabase.cli
 │                   └── IGSFR002Impl.java 
 │                            └── executeUserInsert()
 │
+├── ui/                 <-- 🖥️ Librerias para la lógica de la interfaz de usuario (Puente entre pantalla y comandos o metodos)
+│    └─── igsf
+│           └─── u001
+│                 ├── IGSFU001.java
+│                 └── IGSFU001Impl.java 
+│                          └── executeUserMenú()
 └── dto/                <-- 🔗 Los records que utilizaran las librerias (Contratos para toda la comunicacion entre capas)
      └─── igsf
             ├── c001.java
