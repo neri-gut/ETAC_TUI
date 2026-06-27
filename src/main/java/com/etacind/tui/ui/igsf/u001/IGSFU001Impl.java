@@ -27,6 +27,8 @@ public class IGSFU001Impl implements IGSFU001 {
     private final IGSFT002 igsfT002;
     private final IGSFT003 igsfT003;
 
+    private boolean hasWritePermission = false;
+
     public IGSFU001Impl(IGSFT001 igsfT001, IGSFT002 igsfT002, IGSFT003 igsfT003) {
         this.igsfT001 = igsfT001;
         this.igsfT002 = igsfT002;
@@ -66,6 +68,55 @@ public class IGSFU001Impl implements IGSFU001 {
                 new EmptySpace(darkBg)
         );
 
+        // Ventana de Validación Previa
+        BasicWindow loginWindow = new BasicWindow("Validacion de Operador");
+        loginWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel loginPanel = new Panel(new GridLayout(1));
+        loginPanel.addComponent(new Label("Ingrese su ID de Usuario (userId):"));
+        TextBox txtUserId = new TextBox();
+        loginPanel.addComponent(txtUserId);
+
+        final boolean[] proceed = {false};
+
+        Panel btnPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        btnPanel.addComponent(new Button("Ingresar", () -> {
+            String userId = txtUserId.getText().trim();
+            if (userId.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "El ID de usuario es obligatorio");
+                return;
+            }
+
+            SupabaseApiResponse<UsersTableRecord> response = igsfT001.getUserById(userId);
+            if (response != null && response.data() != null && !response.data().isEmpty()) {
+                UsersTableRecord operator = response.data().get(0);
+                if ("1".equals(operator.statusId())) {
+                    hasWritePermission = true;
+                    MessageDialog.showMessageDialog(gui, "Acceso Permitido", "Bienvenido " + operator.userName() + ".\nPermisos de escritura activados (statusId = 1).");
+                } else {
+                    hasWritePermission = false;
+                    MessageDialog.showMessageDialog(gui, "Acceso Restringido", "Bienvenido " + operator.userName() + ".\nSolo lectura (su statusId es " + operator.statusId() + ", diferente de 1).");
+                }
+                proceed[0] = true;
+                loginWindow.close();
+            } else {
+                MessageDialog.showMessageDialog(gui, "Acceso Denegado", "El usuario con ID " + userId + " no existe.");
+            }
+        }));
+        btnPanel.addComponent(new Button("Salir", loginWindow::close));
+
+        loginPanel.addComponent(new Separator(Direction.HORIZONTAL));
+        loginPanel.addComponent(btnPanel);
+        loginWindow.setComponent(loginPanel);
+
+        gui.addWindowAndWait(loginWindow);
+
+        if (!proceed[0]) {
+            screen.stopScreen();
+            return;
+        }
+
+        // Ventana del Menú Principal
         BasicWindow window = new BasicWindow("Sistema ETAC - Menu Principal");
         window.setHints(List.of(Window.Hint.CENTERED));
 
@@ -142,6 +193,11 @@ public class IGSFU001Impl implements IGSFU001 {
     }
 
     private void showCreateUserDialog(WindowBasedTextGUI gui) {
+        if (!hasWritePermission) {
+            MessageDialog.showMessageDialog(gui, "Acceso Denegado", "El operador no tiene privilegios de escritura (statusId != 1).");
+            return;
+        }
+
         BasicWindow dialogWindow = new BasicWindow("Crear Usuario");
         dialogWindow.setHints(List.of(Window.Hint.CENTERED));
 
@@ -216,6 +272,11 @@ public class IGSFU001Impl implements IGSFU001 {
     }
 
     private void showUpdateUserDialog(WindowBasedTextGUI gui) {
+        if (!hasWritePermission) {
+            MessageDialog.showMessageDialog(gui, "Acceso Denegado", "El operador no tiene privilegios de escritura (statusId != 1).");
+            return;
+        }
+
         BasicWindow dialogWindow = new BasicWindow("Actualizar Usuario");
         dialogWindow.setHints(List.of(Window.Hint.CENTERED));
 
@@ -331,6 +392,11 @@ public class IGSFU001Impl implements IGSFU001 {
     }
 
     private void showDeleteUserDialog(WindowBasedTextGUI gui) {
+        if (!hasWritePermission) {
+            MessageDialog.showMessageDialog(gui, "Acceso Denegado", "El operador no tiene privilegios de escritura (statusId != 1).");
+            return;
+        }
+
         BasicWindow submenuWindow = new BasicWindow("Eliminar Usuario - Opciones");
         submenuWindow.setHints(List.of(Window.Hint.CENTERED));
 
@@ -512,6 +578,11 @@ public class IGSFU001Impl implements IGSFU001 {
     }
 
     private void showCreateProductDialog(WindowBasedTextGUI gui) {
+        if (!hasWritePermission) {
+            MessageDialog.showMessageDialog(gui, "Acceso Denegado", "El operador no tiene privilegios de escritura (statusId != 1).");
+            return;
+        }
+
         BasicWindow dialogWindow = new BasicWindow("Crear Producto");
         dialogWindow.setHints(List.of(Window.Hint.CENTERED));
 
@@ -592,6 +663,11 @@ public class IGSFU001Impl implements IGSFU001 {
     }
 
     private void showUpdateProductDialog(WindowBasedTextGUI gui) {
+        if (!hasWritePermission) {
+            MessageDialog.showMessageDialog(gui, "Acceso Denegado", "El operador no tiene privilegios de escritura (statusId != 1).");
+            return;
+        }
+
         BasicWindow dialogWindow = new BasicWindow("Actualizar Producto");
         dialogWindow.setHints(List.of(Window.Hint.CENTERED));
 
@@ -713,6 +789,11 @@ public class IGSFU001Impl implements IGSFU001 {
     }
 
     private void showDeleteProductDialog(WindowBasedTextGUI gui) {
+        if (!hasWritePermission) {
+            MessageDialog.showMessageDialog(gui, "Acceso Denegado", "El operador no tiene privilegios de escritura (statusId != 1).");
+            return;
+        }
+
         BasicWindow dialogWindow = new BasicWindow("Eliminar Producto");
         dialogWindow.setHints(List.of(Window.Hint.CENTERED));
 
