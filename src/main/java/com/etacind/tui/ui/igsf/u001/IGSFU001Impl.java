@@ -2,6 +2,7 @@ package com.etacind.tui.ui.igsf.u001;
 
 import com.etacind.tui.command.igsf.t001.IGSFT001;
 import com.etacind.tui.command.igsf.t002.IGSFT002;
+import com.etacind.tui.command.igsf.t003.IGSFT003;
 import com.etacind.tui.dto.igsf.c001.UsersTableRecord;
 import com.etacind.tui.dto.igsf.c001.ProductsTableRecord;
 import com.etacind.tui.dto.igsf.c001.HistoryTableRecord;
@@ -24,10 +25,12 @@ public class IGSFU001Impl implements IGSFU001 {
 
     private final IGSFT001 igsfT001;
     private final IGSFT002 igsfT002;
+    private final IGSFT003 igsfT003;
 
-    public IGSFU001Impl(IGSFT001 igsfT001, IGSFT002 igsfT002) {
+    public IGSFU001Impl(IGSFT001 igsfT001, IGSFT002 igsfT002, IGSFT003 igsfT003) {
         this.igsfT001 = igsfT001;
         this.igsfT002 = igsfT002;
+        this.igsfT003 = igsfT003;
     }
 
     @Override
@@ -74,6 +77,7 @@ public class IGSFU001Impl implements IGSFU001 {
 
         mainPanel.addComponent(new Button("Gestion de Usuarios", () -> showUsersSubmenu(gui)));
         mainPanel.addComponent(new Button("Gestion de Productos", () -> showProductsSubmenu(gui)));
+        mainPanel.addComponent(new Button("Consulta de Historial", () -> showHistorySubmenu(gui)));
         
         mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
         mainPanel.addComponent(new Button("Salir", window::close));
@@ -897,5 +901,206 @@ public class IGSFU001Impl implements IGSFU001 {
         } else {
             MessageDialog.showMessageDialog(gui, "Error", errorMessage);
         }
+    }
+
+    // ==========================================
+    // SUBMENÚ: HISTORIAL DE TRANSACCIONES
+    // ==========================================
+    private void showHistorySubmenu(WindowBasedTextGUI gui) {
+        BasicWindow submenuWindow = new BasicWindow("Consulta de Historial");
+        submenuWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        mainPanel.addComponent(new Label("Opciones de Consulta de Historial:"));
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        mainPanel.addComponent(new Button("Listar Todo el Historial", () -> showAllHistory(gui)));
+        mainPanel.addComponent(new Button("Buscar por ID de Usuario", () -> showSearchHistoryByUserIdForm(gui)));
+        mainPanel.addComponent(new Button("Buscar por ID de Accion", () -> showSearchHistoryByActionIdForm(gui)));
+        mainPanel.addComponent(new Button("Buscar por ID de Producto", () -> showSearchHistoryByProductIdForm(gui)));
+        mainPanel.addComponent(new Button("Buscar por Fecha", () -> showSearchHistoryByDateForm(gui)));
+        
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+        mainPanel.addComponent(new Button("Volver al Menu Principal", submenuWindow::close));
+
+        submenuWindow.setComponent(mainPanel);
+        gui.addWindow(submenuWindow);
+    }
+
+    private void showAllHistory(WindowBasedTextGUI gui) {
+        SupabaseApiResponse<HistoryTableRecord> response = igsfT003.getAllHistory();
+        displayHistoryResults(gui, response, "No se encontraron registros de historial en la base de datos.");
+    }
+
+    private void showSearchHistoryByUserIdForm(WindowBasedTextGUI gui) {
+        BasicWindow dialogWindow = new BasicWindow("Buscar Historial por ID de Usuario");
+        dialogWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel formPanel = new Panel(new GridLayout(2));
+
+        formPanel.addComponent(new Label("ID de Usuario (userid):"));
+        TextBox txtUserId = new TextBox();
+        formPanel.addComponent(txtUserId);
+
+        mainPanel.addComponent(formPanel);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        
+        Button btnSearch = new Button("Buscar", () -> {
+            String userId = txtUserId.getText().trim();
+            if (userId.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "El ID de usuario es obligatorio");
+                return;
+            }
+
+            SupabaseApiResponse<HistoryTableRecord> response = igsfT003.getHistoryByUserId(userId);
+            dialogWindow.close();
+            displayHistoryResults(gui, response, "No se encontro historial para ese ID de usuario");
+        });
+        
+        buttonPanel.addComponent(btnSearch);
+        buttonPanel.addComponent(new Button("Cancelar", dialogWindow::close));
+
+        mainPanel.addComponent(buttonPanel);
+        dialogWindow.setComponent(mainPanel);
+        gui.addWindow(dialogWindow);
+    }
+
+    private void showSearchHistoryByActionIdForm(WindowBasedTextGUI gui) {
+        BasicWindow dialogWindow = new BasicWindow("Buscar Historial por ID de Accion");
+        dialogWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel formPanel = new Panel(new GridLayout(2));
+
+        formPanel.addComponent(new Label("ID de Accion (actionid):"));
+        TextBox txtActionId = new TextBox();
+        formPanel.addComponent(txtActionId);
+
+        mainPanel.addComponent(formPanel);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        
+        Button btnSearch = new Button("Buscar", () -> {
+            String actionId = txtActionId.getText().trim();
+            if (actionId.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "El ID de accion es obligatorio");
+                return;
+            }
+
+            SupabaseApiResponse<HistoryTableRecord> response = igsfT003.getHistoryByActionId(actionId);
+            dialogWindow.close();
+            displayHistoryResults(gui, response, "No se encontro historial para ese ID de accion");
+        });
+        
+        buttonPanel.addComponent(btnSearch);
+        buttonPanel.addComponent(new Button("Cancelar", dialogWindow::close));
+
+        mainPanel.addComponent(buttonPanel);
+        dialogWindow.setComponent(mainPanel);
+        gui.addWindow(dialogWindow);
+    }
+
+    private void showSearchHistoryByProductIdForm(WindowBasedTextGUI gui) {
+        BasicWindow dialogWindow = new BasicWindow("Buscar Historial por ID de Producto");
+        dialogWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel formPanel = new Panel(new GridLayout(2));
+
+        formPanel.addComponent(new Label("ID de Producto (productid):"));
+        TextBox txtProductId = new TextBox();
+        formPanel.addComponent(txtProductId);
+
+        mainPanel.addComponent(formPanel);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        
+        Button btnSearch = new Button("Buscar", () -> {
+            String productId = txtProductId.getText().trim();
+            if (productId.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "El ID de producto es obligatorio");
+                return;
+            }
+
+            SupabaseApiResponse<HistoryTableRecord> response = igsfT003.getHistoryByProductId(productId);
+            dialogWindow.close();
+            displayHistoryResults(gui, response, "No se encontro historial para ese ID de producto");
+        });
+        
+        buttonPanel.addComponent(btnSearch);
+        buttonPanel.addComponent(new Button("Cancelar", dialogWindow::close));
+
+        mainPanel.addComponent(buttonPanel);
+        dialogWindow.setComponent(mainPanel);
+        gui.addWindow(dialogWindow);
+    }
+
+    private void showSearchHistoryByDateForm(WindowBasedTextGUI gui) {
+        BasicWindow dialogWindow = new BasicWindow("Buscar Historial por Fecha");
+        dialogWindow.setHints(List.of(Window.Hint.CENTERED));
+
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel formPanel = new Panel(new GridLayout(2));
+
+        formPanel.addComponent(new Label("Fecha (YYYY-MM-DD):"));
+        TextBox txtDate = new TextBox();
+        formPanel.addComponent(txtDate);
+
+        mainPanel.addComponent(formPanel);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+
+        Panel buttonPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        
+        Button btnSearch = new Button("Buscar", () -> {
+            String date = txtDate.getText().trim();
+            if (date.isEmpty()) {
+                MessageDialog.showMessageDialog(gui, "Error", "La fecha es obligatoria");
+                return;
+            }
+
+            SupabaseApiResponse<HistoryTableRecord> response = igsfT003.getHistoryByDate(date);
+            dialogWindow.close();
+            displayHistoryResults(gui, response, "No se encontro historial para esa fecha");
+        });
+        
+        buttonPanel.addComponent(btnSearch);
+        buttonPanel.addComponent(new Button("Cancelar", dialogWindow::close));
+
+        mainPanel.addComponent(buttonPanel);
+        dialogWindow.setComponent(mainPanel);
+        gui.addWindow(dialogWindow);
+    }
+
+    private void displayHistoryResults(WindowBasedTextGUI gui, SupabaseApiResponse<HistoryTableRecord> response, String errorMessage) {
+        if (response == null || response.data() == null || response.data().isEmpty()) {
+            MessageDialog.showMessageDialog(gui, "Informacion", errorMessage);
+            return;
+        }
+
+        BasicWindow resultsWindow = new BasicWindow("Historial de Transacciones");
+        resultsWindow.setHints(List.of(Window.Hint.CENTERED));
+        
+        Panel mainPanel = new Panel(new GridLayout(1));
+        Table<String> table = new Table<>("ID Historial", "ID Usuario", "ID Accion", "ID Producto", "Fecha Transaccion");
+        for (HistoryTableRecord h : response.data()) {
+            table.getTableModel().addRow(
+                    h.historyId() != null ? h.historyId() : "",
+                    h.userId() != null ? h.userId() : "",
+                    h.actionId() != null ? h.actionId() : "",
+                    h.productId() != null ? h.productId() : "",
+                    h.executionDate() != null ? h.executionDate() : ""
+            );
+        }
+        mainPanel.addComponent(table);
+        mainPanel.addComponent(new Separator(Direction.HORIZONTAL));
+        mainPanel.addComponent(new Button("Aceptar", resultsWindow::close));
+        
+        resultsWindow.setComponent(mainPanel);
+        gui.addWindow(resultsWindow);
     }
 }
